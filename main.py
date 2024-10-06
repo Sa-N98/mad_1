@@ -1,4 +1,4 @@
-from flask import Flask, render_template as rt
+from flask import Flask, render_template as rt, request, redirect, url_for
 from model import *
 import os
 
@@ -15,7 +15,42 @@ app.app_context().push() # programming stack
 
 @app.route('/', methods=['GET','POST'] )
 def home():
+    if request.method == "POST":
+        user_email = request.form['EMAIL']
+        user_password = request.form['PASSWORD']
+        
+        user = users.query.filter_by(email = user_email).first()
+
+        if user:
+            if user_password == user.password:
+                if user.user_type == 'admin':
+                    return redirect(url_for('admin'))
+                elif user.user_type == 'customer':
+                    return redirect(url_for('customer'))
+                else:
+                    return redirect(url_for('theater'))
     return rt('home.html')
+
+
+
+@app.route('/admin', methods=['GET','POST'] )
+def admin():
+    return rt('admin.html')
+
+@app.route('/customer', methods=['GET','POST'] )
+def customer():
+    return rt('customer.html')
+
+@app.route('/theater', methods=['GET','POST'] )
+def theater():
+    return rt('theater.html')
+
+
+
+
+
+
+
 
 @app.route('/sqldemo', methods=['GET','POST'] )
 def sqldemo():
@@ -43,6 +78,20 @@ def sqldemo():
 
     
     return "sql_demo check vs_code terminal for output"
+
+
+
+
+@app.route('/datashow', methods=['GET','POST'] )
+def datashow():
+    data = users.query.filter(users.user_type == 'customer').all()
+    return rt('data.html', var= data)
+
+
+
+
+
+
 
 
 
